@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
     return {
         "name": "Korea Data API",
@@ -44,12 +44,18 @@ def root():
     }
 
 
-@app.get("/health")
+@app.get("/health", include_in_schema=False)
 def health():
     return {"status": "ok", "years_loaded": list(HOLIDAYS.keys())}
 
 
-@app.get("/holidays/next")
+@app.get(
+    "/holidays/next",
+    operation_id="getNextHoliday",
+    summary="Get Next Holiday",
+    description="Returns the next upcoming Korean public holiday from today or a given date.",
+    tags=["Holidays"],
+)
 def next_holiday(from_date: Optional[str] = Query(None, description="Start date YYYY-MM-DD. Defaults to today.")):
     """Get the next upcoming Korean public holiday."""
     if from_date:
@@ -74,7 +80,13 @@ def next_holiday(from_date: Optional[str] = Query(None, description="Start date 
     raise HTTPException(status_code=404, detail="No upcoming holidays in dataset")
 
 
-@app.get("/holidays/range")
+@app.get(
+    "/holidays/range",
+    operation_id="getHolidaysInRange",
+    summary="Get Holidays In Date Range",
+    description="Returns all Korean public holidays that fall between two dates (inclusive).",
+    tags=["Holidays"],
+)
 def holidays_in_range(
     start: str = Query(..., description="Start date YYYY-MM-DD"),
     end: str = Query(..., description="End date YYYY-MM-DD"),
@@ -105,7 +117,13 @@ def holidays_in_range(
     }
 
 
-@app.get("/holidays/check/{check_date}")
+@app.get(
+    "/holidays/check/{check_date}",
+    operation_id="checkIfDateIsHoliday",
+    summary="Check If Date Is Holiday",
+    description="Check whether a specific date is a Korean public holiday. Also returns day of week and weekend status.",
+    tags=["Holidays"],
+)
 def check_holiday(check_date: str):
     """Check if a specific date (YYYY-MM-DD) is a Korean public holiday."""
     try:
@@ -127,7 +145,13 @@ def check_holiday(check_date: str):
     }
 
 
-@app.get("/holidays/year/{year}")
+@app.get(
+    "/holidays/year/{year}",
+    operation_id="getHolidaysByYear",
+    summary="Get Holidays By Year",
+    description="Returns all Korean public holidays for a given year (2020-2030). Includes fixed, lunar, substitute, and temporary holidays.",
+    tags=["Holidays"],
+)
 def get_holidays_by_year(
     year: int,
     type: Optional[str] = Query(None, description="Filter by type: fixed, lunar, substitute, temporary"),
@@ -148,7 +172,13 @@ def get_holidays_by_year(
     }
 
 
-@app.get("/holidays/year/{year}/month/{month}")
+@app.get(
+    "/holidays/year/{year}/month/{month}",
+    operation_id="getHolidaysByMonth",
+    summary="Get Holidays By Month",
+    description="Returns Korean public holidays for a specific month of a given year.",
+    tags=["Holidays"],
+)
 def get_holidays_by_month(year: int, month: int):
     """Get Korean public holidays for a specific month."""
     if year not in HOLIDAYS:
